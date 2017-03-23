@@ -25,6 +25,10 @@ After a process which is on the blacklist starts there is a 1 second delay befor
 
 Subscription to the Win management api, which is used for subscribing to process creation events, needs elevated permissions
 
+### Antivir / Malware Scanners
+
+Since this tool injects stuff into other processes it might be considered harmful by virus or malware scanners. Use at your own risk.
+
 ### How to
 
 1) Edit the Config setting "Blacklist" to your liking

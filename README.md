@@ -29,6 +29,10 @@ Subscription to the Win management api, which is used for subscribing to process
 
 Since this tool injects stuff into other processes it might be considered harmful by virus or malware scanners. Use at your own risk.
 
+### Why not a global api redirect?
+
+Globally hooking the api calls requires a kernel mode driver and that requires either test mode (not an option) or a signed driver (too expensive).
+
 ### How to
 
 1) Edit the Config setting "Blacklist" to your liking

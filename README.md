@@ -1,12 +1,14 @@
 # Use at your own Risk
 **Has not been tested thoroughly, may crash itself and injected processes**
 
-## Why?
+### Why?
 
-Certain applications on windows love to steal the focus. This is especially infuriating when you are typing something in Window A and Window B pops and eats all your input.
+Certain applications on windows love to steal the focus. This is especially infuriating when you are typing something in Window A and Window B pops up and eats all your input.
+
 Unfortunately Windows XP is the last windows version where this behaviour could be turned off.
-AFAIK there is not solution for later windows versions anywhere.
-I hacked this tool together to make working on windows not so frustrating.
+AFAIK there is no solution for later windows versions anywhere.
+
+I hacked this tool together to make working on windows less frustrating.
 
 ### What is it?
 

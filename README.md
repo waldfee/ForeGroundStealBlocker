@@ -1,12 +1,14 @@
 # Use at your own Risk
 **Has not been tested thoroughly, may crash itself and injected processes**
 
-## Why?
+### Why?
 
-Certain applications on windows love to steal the focus. This is especially infuriating when you are typing something in Window A and Window B pops and eats all your input.
+Certain applications on windows love to steal the focus. This is especially infuriating when you are typing something in Window A and Window B pops up and eats all your input.
+
 Unfortunately Windows XP is the last windows version where this behaviour could be turned off.
-AFAIK there is not solution for later windows versions anywhere.
-I hacked this tool together to make working on windows not so frustrating.
+AFAIK there is no solution for later windows versions anywhere.
+
+I hacked this tool together to make working on windows less frustrating.
 
 ### What is it?
 
@@ -22,6 +24,14 @@ After a process which is on the blacklist starts there is a 1 second delay befor
 ### Why does it need elevated permissions?
 
 Subscription to the Win management api, which is used for subscribing to process creation events, needs elevated permissions
+
+### Antivir / Malware Scanners
+
+Since this tool injects stuff into other processes it might be considered harmful by virus or malware scanners. Use at your own risk.
+
+### Why not a global api redirect?
+
+Globally hooking the api calls requires a kernel mode driver and that requires either test mode (not an option) or a signed driver (too expensive).
 
 ### How to
 

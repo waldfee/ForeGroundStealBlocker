@@ -27,9 +27,21 @@ namespace ForeGroundBlockerHook
 
         #region Public Methods
 
+        private void Log(string message)
+        {
+            try
+            {
+                _server?.ReportMessage(message);
+            }
+            catch
+            {
+                // exception here kills the host process. we do not want this.
+            }
+        }
+
         public void Run(RemoteHooking.IContext context, string channelName)
         {
-            _server.IsInstalled(RemoteHooking.GetCurrentProcessId());
+            Log($"Injected Focus Steal Blocker Hook into process {RemoteHooking.GetCurrentProcessId()}");
 
             LocalHook setForegroundWindowHook = LocalHook.Create(
                 LocalHook.GetProcAddress("User32.dll", "SetForegroundWindow"),
@@ -38,7 +50,7 @@ namespace ForeGroundBlockerHook
 
             setForegroundWindowHook.ThreadACL.SetExclusiveACL(new[] {0});
 
-            _server.ReportMessage($"SetForegroundWindow hook installed for PID {RemoteHooking.GetCurrentProcessId()}");
+            Log($"SetForegroundWindow hook installed for PID {RemoteHooking.GetCurrentProcessId()}");
 
             RemoteHooking.WakeUpProcess();
 
@@ -58,13 +70,16 @@ namespace ForeGroundBlockerHook
 
                     if (queued.Length > 0)
                     {
-                        _server.ReportMessages(queued);
+                        foreach (string message in queued)
+                        {
+                            Log(message);
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
-                _server.ReportException(ex);
+                Log(ex.ToString());
             }
 
             // Remove hooks
@@ -76,7 +91,7 @@ namespace ForeGroundBlockerHook
 
         ~InjectionEntryPoint()
         {
-            _server.ReportMessage($"PID {RemoteHooking.GetCurrentProcessId()} shutting down");
+            Log($"PID {RemoteHooking.GetCurrentProcessId()} shutting down");
         }
 
         #endregion
@@ -85,7 +100,7 @@ namespace ForeGroundBlockerHook
 
         private bool SetForegroundWindow_Hook(IntPtr hWnd)
         {
-            _server.ReportMessage($"SetForegroundWindow called from PID {RemoteHooking.GetCurrentProcessId()}");
+            Log($"SetForegroundWindow called from PID {RemoteHooking.GetCurrentProcessId()}");
 
             FLASHWINFO flashwinfo = new FLASHWINFO();
             flashwinfo.cbSize = Convert.ToUInt32(Marshal.SizeOf(flashwinfo));

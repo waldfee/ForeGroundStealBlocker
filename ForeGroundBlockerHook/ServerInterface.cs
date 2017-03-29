@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Remoting;
 
 namespace ForeGroundBlockerHook
 {
@@ -22,36 +23,20 @@ namespace ForeGroundBlockerHook
 
         #endregion
 
+        #region Destruction
+
+        ~ServerInterface()
+        {
+            RemotingServices.Disconnect(this);
+        }
+
+        #endregion
+
         #region Public Methods
-
-        public void IsInstalled(int clientPID)
-        {
-            _logger($"Injected Focus Steal Blocker Hook into process {clientPID}");
-        }
-
-        /// <summary>
-        /// Output the message to the console.
-        /// </summary>
-        public void ReportMessages(string[] messages)
-        {
-            foreach (string message in messages)
-            {
-                _logger(message);
-            }
-        }
 
         public void ReportMessage(string message)
         {
             _logger(message);
-        }
-
-        /// <summary>
-        /// Report exception
-        /// </summary>
-        /// <param name="e"></param>
-        public void ReportException(Exception e)
-        {
-            _logger(e.ToString());
         }
 
         #endregion

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -13,6 +15,8 @@ namespace ForeGroundBlockerHook
 
         private readonly ServerInterface _server;
         private readonly Queue<string> _messageQueue = new Queue<string>();
+        private string _processName;
+        private int _pid;
 
         #endregion
 
@@ -41,7 +45,10 @@ namespace ForeGroundBlockerHook
 
         public void Run(RemoteHooking.IContext context, string channelName)
         {
-            Log($"Injected Focus Steal Blocker Hook into process {RemoteHooking.GetCurrentProcessId()}");
+            _pid = RemoteHooking.GetCurrentProcessId();
+            _processName = Path.GetFileName(Process.GetProcessById(_pid).MainModule.FileName);
+
+            Log($"Injected Focus Steal Blocker Hook into process {GetProcessDescription()}");
 
             LocalHook setForegroundWindowHook = LocalHook.Create(
                 LocalHook.GetProcAddress("User32.dll", "SetForegroundWindow"),
@@ -50,7 +57,7 @@ namespace ForeGroundBlockerHook
 
             setForegroundWindowHook.ThreadACL.SetExclusiveACL(new[] {0});
 
-            Log($"SetForegroundWindow hook installed for PID {RemoteHooking.GetCurrentProcessId()}");
+            Log($"SetForegroundWindow hook installed for {GetProcessDescription()}");
 
             RemoteHooking.WakeUpProcess();
 
@@ -89,9 +96,14 @@ namespace ForeGroundBlockerHook
             LocalHook.Release();
         }
 
+        private string GetProcessDescription()
+        {
+            return $"{_processName};{Process.GetProcessById(_pid).MainWindowTitle};{_pid}";
+        }
+
         ~InjectionEntryPoint()
         {
-            Log($"PID {RemoteHooking.GetCurrentProcessId()} shutting down");
+            Log($"{GetProcessDescription()} shutting down");
         }
 
         #endregion
@@ -100,7 +112,7 @@ namespace ForeGroundBlockerHook
 
         private bool SetForegroundWindow_Hook(IntPtr hWnd)
         {
-            Log($"SetForegroundWindow called from PID {RemoteHooking.GetCurrentProcessId()}");
+            Log($"SetForegroundWindow called from {GetProcessDescription()}");
 
             FLASHWINFO flashwinfo = new FLASHWINFO();
             flashwinfo.cbSize = Convert.ToUInt32(Marshal.SizeOf(flashwinfo));

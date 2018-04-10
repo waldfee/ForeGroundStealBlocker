@@ -11,14 +11,19 @@ namespace ForeGroundBlockerHook
         #region Private Fields
 
         private readonly Action<string> _logger;
+        private readonly Action<int> _removeServer;
+        private readonly Func<bool> _shouldAbort;
+        private int _pid;
 
         #endregion
 
         #region Initialization
 
-        public ServerInterface(Action<string> logger)
+        public ServerInterface(Action<string> logger, Action<int> removeServer, Func<bool> shouldAbort)
         {
             _logger = logger;
+            _removeServer = removeServer;
+            _shouldAbort = shouldAbort;
         }
 
         #endregion
@@ -27,6 +32,7 @@ namespace ForeGroundBlockerHook
 
         ~ServerInterface()
         {
+            _removeServer(_pid);
             RemotingServices.Disconnect(this);
         }
 
@@ -39,6 +45,16 @@ namespace ForeGroundBlockerHook
             _logger(message);
         }
 
+        public bool ShouldAbort()
+        {
+            return _shouldAbort();
+        }
+
         #endregion
+
+        public void SetPid(int pid)
+        {
+            _pid = pid;
+        }
     }
 }

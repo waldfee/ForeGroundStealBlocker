@@ -18,6 +18,9 @@ namespace ForeGroundBlockerHook
         private string _processName;
         private int _pid;
 
+        //private const int FLASHW_STOP = 0;
+        private const int FLASHW_TRAY = 2;
+
         #endregion
 
         #region Initialization
@@ -29,24 +32,23 @@ namespace ForeGroundBlockerHook
 
         #endregion
 
-        #region Public Methods
+        #region Destruction
 
-        private void Log(string message)
+        ~InjectionEntryPoint()
         {
-            try
-            {
-                _server?.ReportMessage(message);
-            }
-            catch
-            {
-                // exception here kills the host process. we do not want this.
-            }
+            Log($"{GetProcessDescription()} shutting down");
         }
+
+        #endregion
+
+        #region Public Methods
 
         public void Run(RemoteHooking.IContext context, string channelName)
         {
             _pid = RemoteHooking.GetCurrentProcessId();
             _processName = Path.GetFileName(Process.GetProcessById(_pid).MainModule.FileName);
+
+            _server.SetPid(_pid);
 
             Log($"Injected Focus Steal Blocker Hook into process {GetProcessDescription()}");
 
@@ -63,7 +65,7 @@ namespace ForeGroundBlockerHook
 
             try
             {
-                while (true)
+                while (_server != null && !_server.ShouldAbort())
                 {
                     Thread.Sleep(500);
 
@@ -96,33 +98,47 @@ namespace ForeGroundBlockerHook
             LocalHook.Release();
         }
 
+        #endregion
+
+        #region Private Methods
+
+        private void Log(string message)
+        {
+            try
+            {
+                _server?.ReportMessage(message);
+            }
+            catch
+            {
+                // exception here kills the host process. we do not want this.
+            }
+        }
+
         private string GetProcessDescription()
         {
             return $"{_processName};{Process.GetProcessById(_pid).MainWindowTitle};{_pid}";
         }
 
-        ~InjectionEntryPoint()
-        {
-            Log($"{GetProcessDescription()} shutting down");
-        }
-
-        #endregion
-
-        #region Private Methods
-
         private bool SetForegroundWindow_Hook(IntPtr hWnd)
         {
             Log($"SetForegroundWindow called from {GetProcessDescription()}");
 
+            FLASHWINFO flash = CreateFlashwinfo(hWnd, 2, FLASHW_TRAY);
+            FlashWindowEx(ref flash);
+
+            return false;
+        }
+
+        private static FLASHWINFO CreateFlashwinfo(IntPtr hWnd, uint count, uint dwFlags)
+        {
             FLASHWINFO flashwinfo = new FLASHWINFO();
             flashwinfo.cbSize = Convert.ToUInt32(Marshal.SizeOf(flashwinfo));
             flashwinfo.hwnd = hWnd;
-            flashwinfo.dwFlags = 2;
-            flashwinfo.uCount = 2;
+            flashwinfo.dwFlags = dwFlags;
+            flashwinfo.uCount = count;
             flashwinfo.dwTimeout = 0;
-            FlashWindowEx(ref flashwinfo);
 
-            return false;
+            return flashwinfo;
         }
 
         [DllImport("user32.dll")]

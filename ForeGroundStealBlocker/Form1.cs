@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Management;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -25,6 +26,7 @@ namespace ForeGroundStealBlocker
         private string _currentUser;
         private bool _shouldAbort;
         private readonly ConcurrentDictionary<int, ServerInterface> _servers = new ConcurrentDictionary<int, ServerInterface>();
+        private readonly ConcurrentBag<string> _crashList = new ConcurrentBag<string>();
 
         private readonly List<string> _whiteList = new List<string>
                                                    {
@@ -79,6 +81,9 @@ namespace ForeGroundStealBlocker
 
         private void InjectIntoProcess(int targetPID, string targetProcessName)
         {
+            if (_crashList.Contains(targetProcessName))
+                return;
+
             Thread.Sleep(1000);
 
             try
@@ -101,6 +106,7 @@ namespace ForeGroundStealBlocker
             catch (Exception ex)
             {
                 Log($"Error: {ex}");
+                _crashList.Add(targetProcessName);
             }
         }
 

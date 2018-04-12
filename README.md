@@ -43,6 +43,10 @@ Globally hooking the api calls requires a kernel mode driver and that requires e
 Some processes run with memory protection where the naive injection technique is prevented.
 Currently those are completely ignored and for these processes there is no hooking.
 
+### I cannot uninstall / remove this tool because something still locks it
+
+When the tool is closed, the injected processes still have Easyhook loaded because it cannot be unloaded. Either close / kill all the processes that have been injected or simply reboot / relog.
+
 ### Attributions
 * [EasyHook][easyhook] by Christoph Husse / Justin Stenning
 * [System.Management][systemmanagement] by bmars
